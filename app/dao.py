@@ -25,7 +25,8 @@ def get_user_by_id(user_id):
 def register_user(name, username, password):
     user = User()
     user.name = name
-    user.password = str(hashlib.md5(user.password.encode('utf-8')).hexdigest())
+    user.username = username
+    user.password = str(hashlib.md5(password.encode('utf-8')).hexdigest())
     user.role = RoleEnum.PASSENGER
     db.session.add(user)
     db.session.commit()
@@ -34,6 +35,7 @@ def register_user(name, username, password):
 
 def auth_user(username, password):
     password = str(hashlib.md5(password.strip().encode('utf-8')).hexdigest())
+    username = caesar_encrypt(username, SHIFT_CAESAR)
 
-    return User.query.filter(User.username.__eq__(username.strip()),
+    return User.query.filter(User._username.__eq__(username),
                              User.password.__eq__(password)).first()

@@ -1,11 +1,13 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Enum, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, Enum, DateTime, event
 from datetime import datetime
 from sqlalchemy.orm import relationship
 from app import app, db
 from flask_login import UserMixin
 import enum
 import hashlib
+from caesar_cipher import *
 
+SHIFT_CAESAR = 3
 
 class RoleEnum(enum.Enum):
     ADMIN = "admin"
@@ -46,13 +48,31 @@ class User(db.Model, UserMixin):
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(50), nullable=False)
-    username = Column(String(50), nullable=False, unique=True)
+    _name = Column(String(50), nullable=False)
+    _username = Column(String(50), nullable=False, unique=True)
     password = Column(String(200), nullable=False)
     role = Column(Enum(RoleEnum), nullable=False)
 
     def __str__(self):
         return self.name
+
+    @property
+    def name(self):
+        return caesar_decrypt(self._name, SHIFT_CAESAR)
+
+    @name.setter
+    def name(self, value):
+        self._name = caesar_encrypt(value, SHIFT_CAESAR)
+
+    @property
+    def username(self):
+        return caesar_decrypt(self._username, SHIFT_CAESAR)
+
+    @username.setter
+    def username(self, value):
+        self._username = caesar_encrypt(value, SHIFT_CAESAR)
+
+
 
 if __name__ == '__main__':
     with app.app_context():
@@ -60,19 +80,19 @@ if __name__ == '__main__':
         db.create_all()
 
         khachhang_user = User(name="Khach hang",
-                    username="khachhang",
-                    password=str(hashlib.md5("123".encode('utf-8')).hexdigest()),
-                    role=RoleEnum.PASSENGER)
-
-        thanhdat_user = User(name="Thanh Dat",
-                              username="thanhdat",
+                              username="khachhang",
                               password=str(hashlib.md5("123".encode('utf-8')).hexdigest()),
                               role=RoleEnum.PASSENGER)
 
+        thanhdat_user = User(name="Thanh Dat",
+                             username="thanhdat",
+                             password=str(hashlib.md5("123".encode('utf-8')).hexdigest()),
+                             role=RoleEnum.PASSENGER)
+
         admin_user = User(name="admin",
-                    username="admin",
-                    password=str(hashlib.md5("123".encode('utf-8')).hexdigest()),
-                    role=RoleEnum.ADMIN)
+                          username="admin",
+                          password=str(hashlib.md5("123".encode('utf-8')).hexdigest()),
+                          role=RoleEnum.ADMIN)
         db.session.add_all([khachhang_user, thanhdat_user, admin_user])
 
         f1 = Flight(name="Hà Nội tới TP.HCM", price=2400000, image="https://wallpapercave.com/wp/9aungfd.jpg")

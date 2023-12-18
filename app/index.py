@@ -76,6 +76,7 @@ def login():
         if user:
             login_user(user)
             #   flash('Login successful!', 'success')
+            print(user.role)
             if user.role == RoleEnum.ADMIN:
                 return redirect('/admin')
             return redirect(url_for('home'))
@@ -121,6 +122,8 @@ def get_user(user_id):
 def unauthorized_handler():
     return redirect(url_for('login'))
 
+
 if __name__ == '__main__':
     from app import admin
+
     app.run(debug=True)

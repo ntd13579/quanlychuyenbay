@@ -3,6 +3,7 @@ from flask_admin import Admin, BaseView, expose
 from flask_login import current_user, logout_user
 from flask import redirect
 from app import app, db, admin
+from app.caesar_cipher import caesar_decrypt
 from app.models import User, Booking, RoleEnum
 
 
@@ -16,18 +17,17 @@ class AuthenticatedAdmin(ModelView):
 
 class UserView(AuthenticatedAdmin):
     column_display_pk = True
-    can_view_details = True
-    can_export = True
-    edit_modal = True
-    details_modal = True
-    create_modal = True
-    can_create = True
+
+    can_view_details = False
+    edit_modal = False
+    can_create = False
+    can_edit = False
+
+    column_list = ('id', 'name', 'username', 'password', 'role')
 
 
 class BookingView(AuthenticatedAdmin):
     column_list = ('id', 'flight', 'user_id', 'user', 'time')
-
-
 
     column_display_pk = True
     can_view_details = True
